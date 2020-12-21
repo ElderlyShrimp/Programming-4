@@ -1,0 +1,191 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <fstream>
+
+using namespace std;
+
+void clean(string str)
+{
+	setlocale(LC_ALL, "Russian");
+	
+	char znak[9] = { ',' , ':' , ';' , '!' , '?' , '-' , '"' };
+
+	for (int j = 0; j < str.length(); j++)
+	{
+		if (str[j] == ' ')
+		{
+			while (str[j + 1] == ' ')
+				str.erase(j + 1, 1);
+		}
+	}
+	if (str[0] == ' ')
+		str.erase(0, 1);
+
+	if (str[str.length() - 1] == ' ')
+		str.erase(str.length() - 2, 1);
+
+	for (int i = 0; i < str.length(); i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			if (str[i] == znak[j])
+			{
+				while (str[i + 1] == znak[j])
+					str.erase(i + 1, 1);
+			}
+		}
+
+	}
+
+	for (int j = 0; j < str.length(); j++)
+	{
+		if (str[j] == '.' && str[j + 1] == '.' && str[j + 2] == '.')
+		{
+			j += 2;
+		}
+		else
+			if (str[j] == '.')
+			{
+				while (str[j + 1] == '.')
+					str.erase(j + 1, 1);
+			}
+	}
+
+	for (int i = 1; i < str.length(); i++)
+	{
+		str[i] = tolower(str[i]);
+	}
+
+	cout << "Отредактированная строка:" << str << "\n\n";
+}
+
+bool IsStrContainsNumb(const string str)
+{
+	return str.find_first_not_of(",.:;?!-()'0123456789") == string::npos;
+}
+bool IsStrContainsLetters(const string str)
+{
+	return str.find_first_not_of(",.:;?!-()'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") == string::npos;
+}
+
+void linear(string line, string substring)
+{
+	int leng2 = substring.length();
+	int leng1 = line.length();
+	cout << "Индексы: ";
+	for (int i = 0; i <= leng1 - leng2; i++) 
+	{
+		int j;
+		for (j = 0; j < leng2; j++)
+			if (line[i + j] != substring[j])
+				break;
+		if (j == leng2)
+			cout << i << " ";
+		
+	}
+	cout << endl;
+}
+
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+
+	string a;
+	cout << "Введите строку: ";
+	getline(cin, a);
+
+	bool filter = a.find_first_not_of(",.:;?!-()'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ") != string::npos;
+
+	bool quan = 0;
+	stringstream buf(a);
+	string Lett;
+	int words = 0;
+	while (buf >> Lett) {
+		words++;
+		if ((Lett.size() >= 10) || (Lett.size() < 1)) {
+			quan = 1;
+		}
+	}
+	int pass = 1;
+
+	if ((quan == 1) || (words < 1) || (words >= 50) || (filter == 1)) {
+		cout << "Введённая строка не соответствует условиям.\n 1)От 1 до 50 слов\n2)В каждом слове от 1 до 10 букв и цифр\n3)Только латинские буквы\n\n";
+		pass = 0;
+	}
+
+	while (pass == 1)
+	{
+		int number;
+		cout << "Выберите номер задания:\n2)Необходимо отредактировать входной текст: удалить лишние пробелы, удалить лишние знаки препинания, исправить регистр букв\n3)Вариант 6: После окончания ввода последовательности вывести на экран сначала все слова, содержащие только буквы, затем слова, содержащие только цифры, а потом слова, содержащие и буквы, и цифры.\n4) Вариант 5: Вывести на экран ту же последовательность, переместив все цифры, содержащиеся в словах, в конец соответствующих слов.\n5)Необходимо найти все подстроки, которую введёт пользователь в имеющейся строке.\n6)Выход\n\n";
+		cin >> number;
+
+		switch (number) {
+		case 2: {
+			clean(a);
+			break;
+		}
+		case 3: {
+			clean(a);
+			string let;
+			string num;
+			string letAndnum;
+			istringstream a2(a);
+
+			while (a2 >> a) {
+
+				if (IsStrContainsNumb(a) == 1) {
+					num += a;
+					num += " ";
+				}
+				if (IsStrContainsLetters(a) == 1) {
+					let += a;
+					let += " ";
+				}
+				if ((IsStrContainsLetters(a) == 0) && (IsStrContainsNumb(a) == 0)) {
+					letAndnum += a;
+					letAndnum += " ";
+				}
+			}
+
+			cout << "Слова, содержащие только буквы: " << let << endl;
+			cout << "Слова, содержащие только цифры: " << num << endl;
+			cout << "Слова, содержащие буквы и цифры: " << letAndnum << endl;
+			cout << endl;
+			break;
+
+		}
+		case 4:
+		{
+			auto start = a.begin();
+			auto space = a.begin();
+			while (true) {
+				space = find(start, a.end(), ' ');
+				stable_partition(start, space, [](char a) {return !isdigit(a); });
+				if (space == a.end())
+					break;
+				start = space + 1;
+			}
+			cout << a << endl;
+			break;
+		}
+		case 5:
+		{
+			string a2;
+			cout << "\nВведите подстроку: ";
+			cin >> a2;
+			linear(a, a2);
+
+			break;
+		}
+		case 6:
+			return 0;
+			break;
+		}
+	}
+}
+
+
+
